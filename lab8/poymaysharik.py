@@ -1,181 +1,157 @@
-import pygame as pg
+import pygame
 from pygame.draw import *
-from math import *
 from random import randint
+pygame.init()
+
+FPS = 50
+x0=1000
+y0=700
+screen = pygame.display.set_mode((x0, y0))
+font=pygame.font.SysFont('arial', 30)
+
+BYKVI=(122,36,0)
+FON=(0,22,200)
+
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+GREEN = (0, 255, 0)
+MAGENTA = (255, 0, 255)
+CYAN = (0, 255, 255)
+BLACK = (0, 0, 0)
+COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 
-pg.init()
+class Ball:
+    def __init__(self):
+        self.__color = COLORS[randint(0, len(COLORS)-1)]
+        self.__r = randint(30, 50)
+        self.__x = randint(0, x0)
+        self.__y = randint(0, y0)
+        self.__vx = randint(-10, 10)
+        self.__vy = randint(-10, 10)
 
-FPS = 40
-screen = pg.display.set_mode((900, 900))
+    def get_color(self):
+        return self.__color
 
-Red = (255, 0, 0)
-Blue = (0, 0, 255)
-Yellow = (255, 255, 0)
-Green = (0, 255, 0)
-Pink = (255, 0, 255)
-Cyan = (0, 255, 255)
-Black = (0, 0, 0)
-Lapis = (0, 150, 200)
-Colors = [Red, Green, Blue, Yellow, Pink, Cyan]
+    def get_r(self):
+        return self.__r
 
-counter = 0 #общее число очков 
-misses = 0  #число мискликов
+    def get_x(self):
+        return self.__x
 
-count_of_balls = 4
-absis = [0 for i in range(count_of_balls)]
-ordinate = [0 for i in range(count_of_balls)]
-radius = [0 for i in range(count_of_balls)]
-velocity = [] #скорость
-repeat = 0
-colour = []
-cycle = 0
-lapis = 0
+    def get_y(self):
+        return self.__y
 
+    def get_vx(self):
+        return self.__vx
 
-def new_ball():  # Рисуем шарик
-    global x, y, r, color, vx, vy
-    x = randint(100, 1100)
-    y = randint(100, 700)
-    r = randint(20, 70)
-    vx = randint(-7, 7)
-    vy = randint(-7, 7)
-    color = Colors[randint(0, 5)]
-    circle(screen, color, (x, y), r)
+    def get_vy(self):
+        return self.__vy
 
+    def set_vx(self,vx):
+        self.__vx=vx
 
-def multiple_balls():  # Рисуем несколько шариков, с возможностью указать их максимальное количество
-    global count_of_balls, absis, ordinate, radius, FPS, color, velocity
-    new_ball()
-    velocity.append([vx, vy])
-    colour.append(color)
-    absis.append(x)
-    ordinate.append(y)
-    radius.append(r)
+    def set_vy(self,vy):
+        self.__vy=vy
 
+    def set_x(self, x):
+        self.__x = x
 
-def ball_move():  # Передвижение шариков по экрану
-    global count_of_balls, absis, ordinate, radius, FPS, colour, velocity
-    screen.fill(Black)
-    for i in range(count_of_balls):
-        absis[i] += velocity[i][0]
-        ordinate[i] += velocity[i][1]
-        if radius[i] > absis[i]:
-            velocity[i][0] = randint(0, 7)
-            velocity[i][1] = randint(-7, 7)
-        if radius[i] > ordinate[i]:
-            velocity[i][1] = randint(0, 7)
-            velocity[i][0] = randint(-7, 7)
-        if absis[i] > 900 - radius[i]:
-            velocity[i][0] = randint(-7, 0)
-            velocity[i][1] = randint(-7, 7)
-        if ordinate[i] > 900 - radius[i]:
-            velocity[i][1] = randint(-7, 0)
-            velocity[i][0] = randint(-7, 7)
-        absis[i] += velocity[i][0]
-        ordinate[i] += velocity[i][1]
-        circle(screen, colour[i], (absis[i], ordinate[i]), radius[i])
+    def set_y(self, y):
+        self.__y = y
 
+    def poverka1PoX(krug):
+        if krug.get_x()>krug.get_r():
+            return True
+        else:
+            return False
 
-def ball_death(n):  # Удаляем самый старый шарик
-    global count_of_balls, absis, ordinate, radius, FPS, colour, velocity
-    screen.fill(Black)
-    velocity = velocity[:n] + velocity[n + 1:]
-    absis = absis[:n] + absis[n + 1:]
-    ordinate = ordinate[:n] + ordinate[n + 1:]
-    radius = radius[:n] + radius[n + 1:]
-    colour = colour[:n] + colour[n + 1:]
-    for i in range(count_of_balls - 1):
-        circle(screen, colour[i], (absis[i], ordinate[i]), radius[i])
+    def poverka1PoY(krug):
+        if krug.get_y() > krug.get_r():
+            return True
+        else:
+            return False
 
+    def poverka2PoX(krug):
+        if (x0-krug.get_x()) > krug.get_r():
+            return True
+        else:
+            return False
 
-def lapis_move():
-    global vx_lapis, vy_lapis, x_lapis, y_lapis
-    x_lapis += vx_lapis*0.1
-    y_lapis += vy_lapis*0.1
-    vx_lapis = randint(-15, 15)
-    vy_lapis = randint(-15, 15)
-    rect(screen, Lapis, (x_lapis, y_lapis, 50, 50))
-    pg.display.update()
-def lapis_rect():
-    global x_lapis, y_lapis, vx_lapis, vy_lapis
-    x_lapis = randint(100, 800)
-    y_lapis = randint(100, 800)
-    vx_lapis = randint(-15, 15)
-    vy_lapis = randint(-15, 15)
-    rect(screen, Lapis, (x_lapis, y_lapis, 50, 50))
+    def poverka2PoY(krug):
+        if (y0-krug.get_y()) > krug.get_r():
+            return True
+        else:
+            return False
+
+def rasvorot(krug):
+    if not krug.poverka1PoX():
+        krug.set_vx(randint(1, 7))
+    if not krug.poverka1PoY():
+        krug.set_vy(randint(1, 7))
+    if not krug.poverka2PoX():
+        krug.set_vx(randint(-7, -1))
+    if not krug.poverka2PoY():
+        krug.set_vy(randint(-7, -1))
 
 
 
 
-def score_points(rad, vel):  # Подсчёт очков за различные цели
-    global counter
-    if rad > 50:
-        precounter = 1
-    elif rad > 35:
-        precounter = 2
-    elif rad > 20:
-        precounter = 4
-    counter += precounter
-    
+def new_ball(balls):
+    while len(balls)<3:
+        a=Ball()
+        balls.append(a)
+    return balls
 
 
-pg.display.update()
-clock = pg.time.Clock()
+
+def popadanie(sharik):
+    if ((event.pos[0]-sharik.get_x())**2+(event.pos[1]-sharik.get_y())**2<=(sharik.get_r())**2):
+        return True
+
+pygame.display.update()
+clock = pygame.time.Clock()
 finished = False
-
+b=[]
+result = 0
+promach=0
 while not finished:
-    multiple_balls()
-    if repeat < count_of_balls:  # Проверка наличия на экране необходимого числа шариков посе запуска
-        repeat += 1
-    elif cycle < 20:  # Реализуем движение шариков
-        clock.tick(FPS)
-        ball_move()
-        pg.display.update()
-        cycle += 1
-    else:
-        ball_death(0)  # Реализуем удаление шариков по истечении их срока жизни
-        pg.display.update()
-        cycle = 0
+    clock.tick(FPS)
+    new_ball(b)
+    for i in range(len(b)):
+        b[i].set_x(b[i].get_x() + b[i].get_vx())
+        b[i].set_y(b[i].get_y() + b[i].get_vy())
+        circle(screen, b[i].get_color(), (b[i].get_x(), b[i].get_y()), b[i].get_r())
 
-    for event in pg.event.get():
-        not_miss = False
-        if event.type == pg.QUIT:
+
+        rasvorot(b[i])
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             finished = True
-
-        elif event.type == pg.MOUSEBUTTONDOWN:  # Событие нажатия мыши
-            mousepos = list(event.pos)  # запоминаем координаты мыши в момент нажатия
-
-            for i in range(count_of_balls):
-                if (absis[i] - mousepos[0]) ** 2 + (ordinate[i] - mousepos[1]) ** 2 <= radius[i] ** 2:  # Проверка попадания в один из кругов
-                    score_points(radius[i], velocity[i][0] ** 2 + velocity[i][1] ** 2)  # Подсчёт оков
-                    print("Tap")
-                    not_miss = True
-                    ball_death(i)  # Удаление нажатого шарика
-                    pg.display.update()
-
-
-            if lapis > 0:
-                if abs(x_lapis - mousepos[0]) <= 50 or abs(y_lapis - mousepos[1]) <= 50:
-                    print("-UltraMegaTap-")
-                    not_miss = True
-                    counter += 10
-                    lapis = 0
-
-            if not not_miss:
-                print("Miss")
-                misses += 1  # Подсчёт промахов
-                not_miss = 0
-            if misses == 5:
-                finished = True  # Проигрыш при пяти промахах
-                print("---You lose---")
-
-    if randint(0, 150) == 20 and lapis == 0:
-        lapis_rect()
-        lapis = 50
-    if lapis > 0:
-        lapis_move()
-        lapis -= 1
-
-print("Your score is", counter)
-pg.quit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            popal=0
+            for i in range(len(b)):
+                if popadanie(b[i]):
+                    result+=1
+                    popal=i+1
+            if popal==0: promach+=1
+            else: b.remove(b[popal-1])
+            if promach>=5:
+                finished = True
+    nadpis= font.render(f'Счёт:{result}', 1, BYKVI, FON)
+    screen.blit(nadpis, (0, 0))
+    pygame.display.update()
+    screen.fill(BLACK)
+finished=False
+screen.fill(BLACK)
+while not finished:
+    clock.tick(FPS)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            finished = True
+        else:
+            nadpis= font.render(f'Игра закончена. Ваш счёт:{result}', 1, BYKVI, FON)
+            screen.blit(nadpis, ((x0-300)//2, (y0-100)//2))
+    pygame.display.update()
+pygame.quit()
