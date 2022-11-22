@@ -143,7 +143,7 @@ class Gun:
         else:
             self.color = GREY
 
-    def draw(self):  # Добавил индикатор уровня зарядки
+    def draw(self):  # Добавилa индикатор уровня зарядки
         rotate_rect(self.screen, self.gunpos, HEIGHT - 50, 15, 100, -pi / 2 + self.an, GREY)
         rotate_rect(self.screen, self.gunpos, HEIGHT - 50, 15, self.f2_power, -pi / 2 + self.an, self.color)
         pg.draw.rect(self.screen, GREY, (self.gunpos - 50, HEIGHT - 65, 100, 50))
